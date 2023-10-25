@@ -11,8 +11,7 @@
 
 function send_notification ()
 {
-  [ "$1" = "startup" ] && MESSAGETEXT="${SERVICE} is online at ${SERVERNAME}"
-  [ "$1" = "shutdown" ] && MESSAGETEXT="Shutting down ${SERVICE} at ${SERVERNAME}"
+  MESSAGETEXT="$1"
 
   ## Twilio Option
   [ -n "$TWILIOFROM" ] && [ -n "$TWILIOTO" ] && [ -n "$TWILIOAID" ] && [ -n "$TWILIOAUTH" ] && \
@@ -27,7 +26,7 @@ function send_notification ()
 
 function zero_service ()
 {
-  send_notification shutdown
+  send_notification Shutdown complete
   echo Setting desired task count to zero.
   aws ecs update-service --cluster $CLUSTER --service $SERVICE --desired-count 0
   exit 0
@@ -99,6 +98,7 @@ echo "Detected $EDITION edition"
 if [ "$EDITION" == "java" ]
 then
   echo "Waiting for Minecraft RCON to begin listening for connections..."
+  send_notification Starting up
   STARTED=0
   while [ $STARTED -lt 1 ]
   do
@@ -124,7 +124,7 @@ then
 fi
 
 ## Send startup notification message
-send_notification startup
+send_notification Startup Complete
 
 echo "Checking every 1 minute for active connections to Minecraft, up to $STARTUPMIN minutes..."
 COUNTER=0
@@ -144,6 +144,7 @@ do
   if [ $COUNTER -gt $STARTUPMIN ] ## no one has connected in at least these many minutes
   then
     echo $STARTUPMIN minutes exceeded without a connection, terminating.
+    send_notification No connections detected on startup, starting server Shutdown
     zero_service
   fi
   ## only doing short sleeps so that we can catch a SIGTERM if needed
@@ -169,4 +170,5 @@ do
 done
 
 echo "$SHUTDOWNMIN minutes elapsed without a connection, terminating."
+send_notification No active conenctions, starting server Shutdown
 zero_service
