@@ -26,7 +26,7 @@ function send_notification ()
 
 function zero_service ()
 {
-  send_notification Shutdown complete
+  send_notification "Shutdown complete. Come back soon."
   echo Setting desired task count to zero.
   aws ecs update-service --cluster $CLUSTER --service $SERVICE --desired-count 0
   exit 0
@@ -80,7 +80,7 @@ aws route53 change-resource-record-sets --hosted-zone-id $DNSZONE --change-batch
 ## detemine java or bedrock based on listening port
 echo "Determining Minecraft edition based on listening port..."
 echo "If we are stuck here, the minecraft container probably failed to start.  Waiting 10 minutes just in case..."
-send_notification Starting up
+send_notification "Starting up. Server should be running in 5-10 min."
 COUNTER=0
 while true
 do
@@ -124,7 +124,7 @@ then
 fi
 
 ## Send startup notification message
-send_notification Startup Complete
+send_notification "Startup Complete. Come join the fun."
 
 echo "Checking every 1 minute for active connections to Minecraft, up to $STARTUPMIN minutes..."
 COUNTER=0
@@ -144,7 +144,7 @@ do
   if [ $COUNTER -gt $STARTUPMIN ] ## no one has connected in at least these many minutes
   then
     echo $STARTUPMIN minutes exceeded without a connection, terminating.
-    send_notification No connections detected on startup, starting server Shutdown
+    send_notification "No connections detected on startup, starting server Shutdown"
     zero_service
   fi
   ## only doing short sleeps so that we can catch a SIGTERM if needed
@@ -170,5 +170,5 @@ do
 done
 
 echo "$SHUTDOWNMIN minutes elapsed without a connection, terminating."
-send_notification No active conenctions, starting server Shutdown
+send_notification "No active conenctions, starting server Shutdown"
 zero_service
