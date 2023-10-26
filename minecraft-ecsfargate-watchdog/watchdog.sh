@@ -80,6 +80,7 @@ aws route53 change-resource-record-sets --hosted-zone-id $DNSZONE --change-batch
 ## detemine java or bedrock based on listening port
 echo "Determining Minecraft edition based on listening port..."
 echo "If we are stuck here, the minecraft container probably failed to start.  Waiting 10 minutes just in case..."
+send_notification Starting up
 COUNTER=0
 while true
 do
@@ -98,7 +99,6 @@ echo "Detected $EDITION edition"
 if [ "$EDITION" == "java" ]
 then
   echo "Waiting for Minecraft RCON to begin listening for connections..."
-  send_notification Starting up
   STARTED=0
   while [ $STARTED -lt 1 ]
   do
