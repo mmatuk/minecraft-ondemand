@@ -40,6 +40,8 @@ function sigterm ()
 }
 trap sigterm SIGTERM
 
+aws sts get-caller-identity
+
 ## get task id from the Fargate metadata
 TASK=$(curl -s ${ECS_CONTAINER_METADATA_URI_V4}/task | jq -r '.TaskARN' | awk -F/ '{ print $NF }')
 echo I believe our task id is $TASK
